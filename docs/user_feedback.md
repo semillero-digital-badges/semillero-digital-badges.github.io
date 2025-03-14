@@ -7,12 +7,10 @@ This document collects user comments on the badge platform and their experience 
 - Observations of interactions within the WhatsApp group.
 - Direct comments on the platform.
 
-## Key Feedback
+## Key Feedback & Actions Taken
 - **Positive**:
   - User's comment - Date
 
-- **Negative / Identified Issues**:
+- **Identified Issues**:
   - "User's comment - Date
-
-## Actions Taken Based on Feedback
-- Change implemented in response to user comments: N/A
+  - Example: 14/03/2025 - A user commented that he would like to receive a confirmation before changing his badge. We added a confirmation message before making changes.
