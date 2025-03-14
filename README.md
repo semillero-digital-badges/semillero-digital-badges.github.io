@@ -23,6 +23,7 @@
 │   ├── research_notes.md
 │   ├── usability_testing.md
 │   ├── user_feedback.md
+│   ├── design_decisions.md
 ```
 - `index.html` → Main page structure.
 - `style.css` → Styling and design.
@@ -30,6 +31,7 @@
 - `database-config.js` → Firebase configuration & interaction with Firestore.
 - `assets/` → Folder containing images, icons, and other media.
 - `docs/` → Documentation & notes about project development.
+- `wireframes/` → Folder with wireframes images.
 
 ---
 ## Provisional Research Goals
