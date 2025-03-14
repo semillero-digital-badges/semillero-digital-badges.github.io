@@ -1,12 +1,12 @@
 # Digital Badges and Participatory Design - Project Documentation
 
 ## Project Overview
-**Provisional Project Name:** Digital Badge System to Encourage Engagement in WhatsApp Learning Communities.
-**Description:** This project develops a web platform integrated with WhatsApp to manage a digital badge system in a learning community. Through a participatory approach, members design and self-claim badges according to their learning objectives. The platform allows logging interactions, visualizing badges and generating automatic notifications in the WhatsApp group, in order to analyze the impact of badges on engagement.
-**Problem to solve:** To address the lack of learning objectives in the research group through a digital badge system with participatory design.
-**Technology Stack:** HTML, CSS, JavaScript, Firebase, GitHub Pages  
-**Provisional Goals:** Design an interface to enhance self-monitoring skills through an innovative behavior-informed approach in UX Learning.
-**Scope:**
+- **Provisional Project Name:** Digital Badge System to Encourage Engagement in WhatsApp Learning Communities.
+- **Description:** This project develops a web platform integrated with WhatsApp to manage a digital badge system in a learning community. Through a participatory approach, members design and self-claim badges according to their learning objectives. The platform allows logging interactions, visualizing badges and generating automatic notifications in the WhatsApp group, in order to analyze the impact of badges on engagement.
+- **Problem to solve:** To address the lack of learning objectives in the research group through a digital badge system with participatory design.
+- **Technology Stack:** HTML, CSS, JavaScript, Firebase, GitHub Pages  
+- **Provisional Goals:** Design an interface to enhance self-monitoring skills through an innovative behavior-informed approach in UX Learning.
+- **Scope:**
 1. Includes:
 
 - Participatory design of digital badges with the research group members.
