@@ -15,8 +15,6 @@ This document gathers usability tests conducted to improve the user experience o
   - Average time to complete the task.
   - Number of errors made.
 
-## Results
+## Results & Actions Taken
 - Date - Finding and possible improvement
-
-## Actions Taken
-- N/A
+- Example: 14/03/2025 - During testing, 60% of users found the process of selecting a badge confusing. In response, we simplified the interface by adding clearer instructions.
