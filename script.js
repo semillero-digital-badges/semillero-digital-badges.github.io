@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("🚀 Badge platform loaded!");
 
     // Example: Handling a button click to claim a badge
-    const claimBadgeButtons = document.querySelectorAll(".claim-badge");
+    const claimBadgeButtons = document.querySelectorAll("button");
 
     claimBadgeButtons.forEach(button => {
         button.addEventListener("click", function () {
