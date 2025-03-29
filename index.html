@@ -15,12 +15,33 @@
             <a href="#">Insignias</a>
             <a href="#">Comentarios</a>
         </nav>
-    </head>
-    
+    </header> 
+
     <main>
         <h2>Bienvenido a la plataforma de insignias</h2>
         <p>Aquí podrás ver y gestionar tus insignias.</p>
+
+        
+        <button onclick="reclamarInsignia('usuario123', '1.png')">Reclamar Insignia</button>
     </main>
 
+    <script>
+    async function reclamarInsignia(usuario, insignia) {
+        const data = {
+            usuario: usuario,
+            insignia: insignia,
+            timestamp: Date.now()
+        };
+
+        await fetch("https://insignias-firebase-2025-cd7f5-default-rtdb.firebaseio.com/reclamos.json", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        alert("Insignia reclamada.");
+    }
+    </script>
 </body>
 </html>
+
