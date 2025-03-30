@@ -1,6 +1,26 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("🚀 Página cargada");
 
+    // Navigation tabs
+    document.getElementById('guia-tab').addEventListener('click', function () {
+        document.getElementById('guia').style.display = 'block';
+        document.getElementById('tablero').style.display = 'none';
+        this.classList.add('active');
+        document.getElementById('dashboard').classList.remove('active');
+    });
+
+    document.getElementById('dashboard').addEventListener('click', function () {
+        document.getElementById('tablero').style.display = 'block';
+        document.getElementById('guia').style.display = 'none';
+        this.classList.add('active');
+        document.getElementById('guia-tab').classList.remove('active');
+    });
+
+    // Show initial section (Guía rápida)
+    document.getElementById('guia').style.display = 'block';
+    document.getElementById('tablero').style.display = 'none';
+    document.getElementById('guia-tab').classList.add('active');
+});
     // Buttons to switch between Badges and Participants list
     document.getElementById('btn-insignias').addEventListener('click', function () {
         document.getElementById('cuadricula-insignias').style.display = 'block';
