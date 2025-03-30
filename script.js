@@ -1,18 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("🚀 Página cargada");
 
-    // Navigation tabs
-    document.getElementById('guia-tab').addEventListener('click', function () {
+    // Navigation tab
+    document.getElementById('guia-tab').addEventListener('click', function() {
         document.getElementById('guia').style.display = 'block';
         document.getElementById('tablero').style.display = 'none';
-        this.classList.add('active');
-        document.getElementById('dashboard').classList.remove('active');
+        document.getElementById('guia-tab').classList.add('active');
+        document.getElementById('dashboard-tab').classList.remove('active');
     });
 
-    document.getElementById('dashboard').addEventListener('click', function () {
+    document.getElementById('dashboard-tab').addEventListener('click', function() {
         document.getElementById('tablero').style.display = 'block';
         document.getElementById('guia').style.display = 'none';
-        this.classList.add('active');
+        document.getElementById('dashboard-tab').classList.add('active');
         document.getElementById('guia-tab').classList.remove('active');
     });
 
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('guia').style.display = 'block';
     document.getElementById('tablero').style.display = 'none';
     document.getElementById('guia-tab').classList.add('active');
-});
+
     // Buttons to switch between Badges and Participants list
     document.getElementById('btn-insignias').addEventListener('click', function () {
         document.getElementById('cuadricula-insignias').style.display = 'block';
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
             { id: "2", name: "Insignia 2", description: "Descripción de Insignia 2" },
             { id: "3", name: "Insignia 3", description: "Descripción de Insignia 3" }
         ];
-        
+
         const gridContainer = document.getElementById('cuadricula-insignias');
         insignias.forEach(insignia => {
             let badgeItem = document.createElement("div");
