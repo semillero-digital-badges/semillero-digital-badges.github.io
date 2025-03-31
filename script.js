@@ -4,7 +4,7 @@ import { getFirestore, collection, getDocs, query, where, doc, updateDoc, arrayU
 document.addEventListener("DOMContentLoaded", function () {
     console.log(" Página cargada");
 
-    // Configuración de Firebase
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBHSiqjIgGKGyWp-uQTYuDhE17W6Zqb_6o",
         authDomain: "insignias-firebase-2025-cd7f5.firebaseapp.com",
@@ -15,11 +15,11 @@ document.addEventListener("DOMContentLoaded", function () {
         measurementId: "G-6FH2TM42GR"
     };
 
-    // Inicializar Firebase
+    // Firebase Init
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Elementos del DOM
+    // DOM elements
     const guiaTab = document.getElementById('guia-tab');
     const dashboardTab = document.getElementById('dashboard-tab');
     const guiaSection = document.getElementById('guia');
@@ -36,13 +36,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const securityAnswerInput = document.getElementById('security-answer');
     const loginButton = document.getElementById('login-button');
 
-    // Funciones para mostrar y ocultar secciones
+    // Functions to show and hide sections
     function showSection(section) {
         document.querySelectorAll('.tab-content').forEach(s => s.style.display = 'none');
         section.style.display = 'block';
     }
 
-    // Cargar Insignias
+    // Load badges
     async function cargarInsignias() {
         const insigniasCollection = collection(db, "Insignias");
         const gridContainer = document.getElementById("cuadricula-insignias");
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Cargar Participantes
+    // Load participants
     async function cargarParticipantes() {
         const participantesCollection = collection(db, "Participantes");
         const gridContainer = document.getElementById("participantes-grid");
@@ -106,20 +106,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Mostrar insignias de participante
+    // Show participant badges
     async function mostrarInsigniasDeParticipante(nombre) {
         vistaParticipante.style.display = "block";
         listaParticipantes.style.display = "none";
         cuadriculaInsignias.style.display = "none";
         document.getElementById("nombre-participante").textContent = nombre;
     
-        // Limpiar contenedores de insignias
+        // Clean badge containers
         const insigniasObtenidasDiv = document.getElementById("insignias-obtenidas");
         const insigniasEnProgresoDiv = document.getElementById("insignias-en-progreso");
         insigniasObtenidasDiv.innerHTML = "";
         insigniasEnProgresoDiv.innerHTML = "";
     
-        // Obtener insignias del participante desde Firestore
+        // obtain participant badges from Firestore
         const participantesCollection = collection(db, "Participantes");
         const q = query(participantesCollection, where("Nombre", "==", nombre));
         try {
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const obtenidas = participante.insignias_obtenidas || [];
                     const enProgreso = participante.insignias_en_progreso || [];
     
-                    // Mostrar insignias obtenidas
+                    // Show obtained badges
                     if (obtenidas.length > 0) {
                         obtenidas.forEach(insignia => {
                             const insigniaElement = document.createElement("p");
@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         insigniasObtenidasDiv.textContent = "No hay insignias obtenidas.";
                     }
     
-                    // Mostrar insignias en progreso
+                    // Show badges in progress
                     if (enProgreso.length > 0) {
                         enProgreso.forEach(insignia => {
                             const insigniaElement = document.createElement("p");
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Eventos de navegación
+    // Navigation events
     guiaTab.addEventListener('click', function() {
         showSection(guiaSection);
         guiaTab.classList.add('active');
@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
         guiaTab.classList.remove('active');
     });
 
-    // Eventos para mostrar listas
+    // Events to show lists
     btnInsignias.addEventListener('click', function () {
         document.getElementById('cuadricula-insignias-container').style.display = 'block';
         document.getElementById('lista-participantes-container').style.display = 'none';
@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Cargar participantes en el select del modal
+    // Load participants in the modal select
     async function cargarParticipantesLogin() {
         const participantesCollection = collection(db, "Participantes");
         try {
@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 option.textContent = participante.Nombre;
                 participantSelect.appendChild(option);
             });
-            // Disparar el evento change manualmente después de cargar los participantes
+            // Trigger event change manually after loading participants
             if (participantSelect.options.length > 0) {
                 participantSelect.dispatchEvent(new Event('change'));
             }
@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Mostrar pregunta de seguridad al seleccionar participante
+    // Show security question when selecting participant
     participantSelect.addEventListener('change', async function () {
         const selectedParticipant = this.value;
         const participantesCollection = collection(db, "Participantes");
@@ -250,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Verificar respuesta de seguridad e iniciar sesión
+    // Security answer verification and Log In
     loginButton.addEventListener('click', async function () {
         const selectedParticipant = participantSelect.value;
         const securityAnswer = securityAnswerInput.value;
@@ -277,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
     
-    // Función para asignar insignia
+    // Function for assigning badges
     async function asignarInsignia(nombreInsignia) {
         const nombreParticipante = participantSelect.value;
         const participantesCollection = collection(db, "Participantes");
@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         insignias_en_progreso: arrayUnion(nombreInsignia)
                     });
                     alert("Insignia asignada como objetivo.");
-                    actualizarListaParticipantes(); // Actualizar la lista
+                    actualizarListaParticipantes(); // Update list
                 });
             } else {
                 alert("Participante no encontrado.");
@@ -302,7 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Función para reclamar insignia
+    // Function for claiming badges
     async function reclamarInsignia(nombreInsignia) {
         const nombreParticipante = participantSelect.value;
         const participantesCollection = collection(db, "Participantes");
@@ -317,7 +317,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         insignias_obtenidas: arrayUnion(nombreInsignia)
                     });
                     alert("Insignia reclamada.");
-                    actualizarListaParticipantes(); // Actualizar la lista
+                    actualizarListaParticipantes(); // Update list
                 });
             } else {
                 alert("Participante no encontrado.");
@@ -328,12 +328,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Función para actualizar la lista de participantes
+    // Function for updating the list of participants
     async function actualizarListaParticipantes() {
         cargarParticipantes();
     }
 
-    // Eventos de clic para los botones "Asignar Insignia" y "Reclamar Insignia"
+    // Click events for the buttons “Assign Badge” and “Claim Badge”.
     document.addEventListener('click', function (event) {
         if (event.target.classList.contains('asignar-insignia')) {
             const nombreInsignia = event.target.dataset.insignia;
@@ -344,7 +344,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
     
-    // Cargar datos iniciales y mostrar la sección "Guía rápida"
+    // Load initial data and display the “Quick Guide” section.
     Promise.all([cargarInsignias(), cargarParticipantes(), cargarParticipantesLogin()])
         .then(() => {
             loginModal.style.display = 'flex';
