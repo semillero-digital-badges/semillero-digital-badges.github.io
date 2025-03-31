@@ -45,7 +45,7 @@ main {
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-top: 20px;
 }
@@ -72,15 +72,88 @@ main {
     margin-bottom: 20px;
 }
 
-#participantes-list li {
-    padding: 10px;
-    cursor: pointer;
+#participantes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 20px;
 }
 
-#participantes-list li:hover {
+#participantes-grid div {
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+}
+
+#participantes-grid div:hover {
     background-color: #f1f1f1;
 }
 
 #vista-participante {
     display: none;
+}
+
+/* Estilos para el modal de inicio de sesión */
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.modal-content button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-content button:hover {
+    background-color: #45a049;
+}
+
+.asignar-insignia,
+.reclamar-insignia {
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.asignar-insignia {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.reclamar-insignia {
+    background-color: #008CBA;
+    color: white;
+    border: none;
 }

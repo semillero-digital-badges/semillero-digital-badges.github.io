@@ -8,6 +8,19 @@
     
 </head>
 <body>
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <h2>Iniciar sesión</h2>
+            <label for="participant-select">Nombre:</label>
+            <select id="participant-select"></select>
+            <label for="security-question">Pregunta de seguridad:</label>
+            <input type="text" id="security-question" readonly>
+            <label for="security-answer">Respuesta de seguridad:</label>
+            <input type="text" id="security-answer">
+            <button id="login-button">Iniciar sesión</button>
+        </div>
+    </div>
+
     <header>
         <h1>Tablero de Insignias</h1>
         <nav>
@@ -17,7 +30,6 @@
     </header> 
 
     <main>
-        <!-- Quick guide section -->
         <section id="guia" class="tab-content">
             <h2>Bienvenido a la plataforma de insignias</h2>
             <h3>¿Cómo funciona? ¡Es fácil y rápido!</h3>
@@ -25,13 +37,12 @@
                 Ve a la sección <strong>"Tablero de insignias"</strong> para descubrir los logros del grupo. Ahí podrás ver una lista de insignias y participantes. Al hacer clic en un nombre, podrás ver las insignias obtenidas por esa persona y las que puedes ganar.</p>
 
             <p><strong>2. Asigna las insignias que deseas obtener:</strong><br>
-                No tienes que obtener todas las insignias del grupo. Tú eliges cuáles deseas. En la lista de insignias, selecciona tu nombre y haz clic en <strong>"Asignar insignia"</strong>. Esta se agregará a tu perfil como una habilidad que quieres aprender en el futuro. Aparecerá en la sección <strong>"Insignias no obtenidas"</strong>.</p>
+                No tienes que obtener todas las insignias del grupo. Tú eliges cuáles deseas. En la lista de insignias, selecciona tu nombre y haz clic en <strong>"Asignar insignia"</strong>. Esta se agregará a tu perfil como una habilidad que quieres aprender en el futuro. Aparecerá en la sección <strong>"Insignias en progreso"</strong>.</p>
 
             <p><strong>3. Reclama tus insignias obtenidas:</strong><br>
                 Cuando hayas aprendido una habilidad, puedes reclamar la insignia correspondiente. Ve a la <strong>lista de participantes</strong>, selecciona tu nombre y haz clic en <strong>"Reclamar insignia"</strong>. La insignia se moverá automáticamente a la sección <strong>"Insignias obtenidas"</strong> de tu perfil.</p>
         </section>
 
-        <!-- Digital badges dashboard section -->
         <section id="tablero" class="tab-content" style="display:none;">
             <div id="menu-lateral">
                 <button id="btn-insignias">Lista de Insignias</button>
@@ -39,28 +50,26 @@
             </div>
 
             <div id="contenido-central">
-                <div id="mensaje">
-                    <p>Selecciona tu nombre para ver y reclamar tus propias insignias. Para ver las insignias de otros, selecciona su nombre.</p>
+                <div id="cuadricula-insignias-container">
+                    <div id="cuadricula-insignias" class="grid"></div>
                 </div>
-
-                <div id="cuadricula-insignias" class="grid"></div>
-
-                <div id="lista-participantes" style="display:none;">
+                <div id="lista-participantes-container" style="display:none;">
                     <input type="text" id="search-participants" placeholder="Buscar participante..." />
-                    <ul id="participantes-list"></ul>
+                    <div id="participantes-grid">
+                    </div>
                 </div>
-                
                 <div id="vista-participante" style="display:none;">
+                    <input type="text" id="search-participants-vista" placeholder="Buscar participante..." />
                     <h3 id="nombre-participante"></h3>
                     <h4>Insignias obtenidas:</h4>
                     <div id="insignias-obtenidas"></div>
-                    <h4>Insignias no obtenidas:</h4>
-                    <div id="insignias-no-obtenidas"></div>
+                    <h4>Insignias en progreso:</h4>
+                    <div id="insignias-en-progreso"></div>
                 </div>
+            </div>
             </section>
         </main>
 
-        <!-- Script principal -->
         <script src="script.js" type="module"></script>
     </body>
     </html>
