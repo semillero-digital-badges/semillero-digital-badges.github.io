@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-            //Functions that handle sidebar button clicks.
+    // Functions that handle sidebar button clicks.
     document.getElementById("btn-participantes").addEventListener("click", () => {
         listaParticipantesContainer.style.display = "block";
         cuadriculaInsigniasContainer.style.display = "none";
@@ -125,59 +125,133 @@ document.addEventListener("DOMContentLoaded", function () {
         cuadriculaInsigniasContainer.style.display = "block";
     });
     
-    // Show participant badges
-    async function mostrarInsigniasDeParticipante(nombre) {
-        vistaParticipante.style.display = "block";
-        listaParticipantes.style.display = "none";
-        cuadriculaInsignias.style.display = "none";
-        document.getElementById("nombre-participante").textContent = nombre;
-    
-        // Clean badge containers
-        const insigniasObtenidasDiv = document.getElementById("insignias-obtenidas");
-        const insigniasEnProgresoDiv = document.getElementById("insignias-en-progreso");
-        insigniasObtenidasDiv.innerHTML = "";
-        insigniasEnProgresoDiv.innerHTML = "";
-    
-        // obtain participant badges from Firestore
-        const participantesCollection = collection(db, "Participantes");
-        const q = query(participantesCollection, where("Nombre", "==", nombre));
-        try {
-            const snapshot = await getDocs(q);
-            if (!snapshot.empty) {
-                snapshot.forEach(docParticipante => {
-                    const participante = docParticipante.data();
-                    const obtenidas = participante.insignias_obtenidas || [];
-                    const enProgreso = participante.insignias_en_progreso || [];
-    
-                    // Show obtained badges
-                    if (obtenidas.length > 0) {
-                        obtenidas.forEach(insignia => {
-                            const insigniaElement = document.createElement("p");
-                            insigniaElement.textContent = insignia;
-                            insigniasObtenidasDiv.appendChild(insigniaElement);
-                        });
-                    } else {
-                        insigniasObtenidasDiv.textContent = "No hay insignias obtenidas.";
+// Show participant badges (MODIFIED VERSION)
+async function mostrarInsigniasDeParticipante(nombre) {
+    console.log(`Mostrando insignias para: ${nombre}`); // Log para verificar nombre
+    const vistaParticipanteElement = document.getElementById('vista-participante');
+    const listaParticipantesContainerElement = document.getElementById('lista-participantes-container');
+    const cuadriculaInsigniasContainerElement = document.getElementById('cuadricula-insignias-container');
+    const nombreParticipanteElement = document.getElementById("nombre-participante");
+    const insigniasObtenidasDiv = document.getElementById("insignias-obtenidas");
+    const insigniasEnProgresoDiv = document.getElementById("insignias-en-progreso");
+
+    // Show the participant view and hide others
+    if (vistaParticipanteElement) vistaParticipanteElement.style.display = "block";
+    if (listaParticipantesContainerElement) listaParticipantesContainerElement.style.display = "none";
+    if (cuadriculaInsigniasContainerElement) cuadriculaInsigniasContainerElement.style.display = "none";
+
+    // Set participant name
+    if (nombreParticipanteElement) nombreParticipanteElement.textContent = nombre;
+
+    // Clear previous badge displays
+    if (insigniasObtenidasDiv) insigniasObtenidasDiv.innerHTML = "";
+    if (insigniasEnProgresoDiv) insigniasEnProgresoDiv.innerHTML = "";
+
+    let obtenidasEncontradas = false;
+    let progresoEncontradas = false;
+
+    // Query the ENTIRE "Insignias" collection
+    const insigniasCollection = collection(db, "Insignias");
+    try {
+        const snapshot = await getDocs(insigniasCollection);
+        console.log(`Se encontraron ${snapshot.docs.length} insignias en total.`); // Log para verificar fetch
+
+        if (!snapshot.empty) {
+            snapshot.forEach(docInsignia => {
+                const insignia = docInsignia.data();
+                const nombreInsignia = insignia.Nombre || 'Nombre no disponible';
+                const descripcionInsignia = insignia.Descripción || 'Descripción no disponible'; // Asumiendo que el campo se llama "Descripción"
+                const nombreArchivo = insignia.nombre_archivo;
+
+                // Check if the participant obtained this badge
+                const participantesObtenida = insignia.participantes_obtenida || [];
+                if (participantesObtenida.includes(nombre)) {
+                    obtenidasEncontradas = true;
+                    console.log(` -> ${nombre} OBTUVO: ${nombreInsignia}`); // Log detallado
+
+                    if (nombreArchivo && insigniasObtenidasDiv) {
+                        const imageUrl = `https://semillero-digital-badges.github.io/assets/images/badges/${nombreArchivo}.png`;
+                        const badgeElement = document.createElement('div');
+                        badgeElement.classList.add('insignia-detalle-item'); // Clase para posible CSS
+                        badgeElement.innerHTML = `
+                            <img src="${imageUrl}" alt="${nombreInsignia}" class="badge-image-detalle" />
+                            <div>
+                                <h5>${nombreInsignia}</h5>
+                                <p>${descripcionInsignia}</p>
+                            </div>
+                        `;
+                        insigniasObtenidasDiv.appendChild(badgeElement);
+                    } else if (insigniasObtenidasDiv) {
+                         // Si no hay archivo, mostrar al menos el texto
+                        const badgeElement = document.createElement('div');
+                        badgeElement.classList.add('insignia-detalle-item');
+                        badgeElement.innerHTML = `
+                            <div>
+                                <h5>${nombreInsignia}</h5>
+                                <p>${descripcionInsignia}</p>
+                                <p><small>(Imagen no disponible)</small></p>
+                            </div>
+                        `;
+                        insigniasObtenidasDiv.appendChild(badgeElement);
+                        if (!nombreArchivo) console.warn(`Insignia obtenida "${nombreInsignia}" no tiene 'nombre_archivo'.`);
                     }
-    
-                    // Show badges in progress
-                    if (enProgreso.length > 0) {
-                        enProgreso.forEach(insignia => {
-                            const insigniaElement = document.createElement("p");
-                            insigniaElement.textContent = insignia;
-                            insigniasEnProgresoDiv.appendChild(insigniaElement);
-                        });
-                    } else {
-                        insigniasEnProgresoDiv.textContent = "No hay insignias en progreso.";
+                }
+
+                // Check if the participant has this badge in progress
+                const participantesEnProgreso = insignia.participantes_en_progreso || [];
+                if (participantesEnProgreso.includes(nombre)) {
+                    progresoEncontradas = true;
+                     console.log(` -> ${nombre} EN PROGRESO: ${nombreInsignia}`); // Log detallado
+
+                    if (nombreArchivo && insigniasEnProgresoDiv) {
+                        const imageUrl = `https://semillero-digital-badges.github.io/assets/images/badges/${nombreArchivo}.png`;
+                        const badgeElement = document.createElement('div');
+                        badgeElement.classList.add('insignia-detalle-item'); // Clase para posible CSS
+                        badgeElement.innerHTML = `
+                            <img src="${imageUrl}" alt="${nombreInsignia}" class="badge-image-detalle" />
+                            <div>
+                                <h5>${nombreInsignia}</h5>
+                                <p>${descripcionInsignia}</p>
+                            </div>
+                        `;
+                        insigniasEnProgresoDiv.appendChild(badgeElement);
+                    } else if (insigniasEnProgresoDiv) {
+                         // Si no hay archivo, mostrar al menos el texto
+                        const badgeElement = document.createElement('div');
+                        badgeElement.classList.add('insignia-detalle-item');
+                        badgeElement.innerHTML = `
+                            <div>
+                                <h5>${nombreInsignia}</h5>
+                                <p>${descripcionInsignia}</p>
+                                <p><small>(Imagen no disponible)</small></p>
+                            </div>
+                        `;
+                        insigniasEnProgresoDiv.appendChild(badgeElement);
+                        if (!nombreArchivo) console.warn(`Insignia en progreso "${nombreInsignia}" no tiene 'nombre_archivo'.`);
                     }
-                });
-            } else {
-                console.log("Participante no encontrado.");
-            }
-        } catch (error) {
-            console.error("Error al obtener insignias del participante:", error);
+                }
+            });
+
+        } else {
+            console.log("La colección de Insignias está vacía.");
         }
+
+        // Add messages if no badges were found for the categories
+        if (!obtenidasEncontradas && insigniasObtenidasDiv) {
+            insigniasObtenidasDiv.textContent = "No hay insignias obtenidas.";
+            console.log(`No se encontraron insignias OBTENIDAS para ${nombre}.`); // Log final
+        }
+        if (!progresoEncontradas && insigniasEnProgresoDiv) {
+            insigniasEnProgresoDiv.textContent = "No hay insignias en progreso.";
+             console.log(`No se encontraron insignias EN PROGRESO para ${nombre}.`); // Log final
+        }
+
+    } catch (error) {
+        console.error("Error al obtener insignias para el participante:", error);
+        if (insigniasObtenidasDiv) insigniasObtenidasDiv.textContent = "Error al cargar insignias.";
+        if (insigniasEnProgresoDiv) insigniasEnProgresoDiv.textContent = "Error al cargar insignias.";
     }
+}
 
     // Function for assigning badges
     async function asignarInsignia(nombreInsignia) {
@@ -286,35 +360,29 @@ document.addEventListener("DOMContentLoaded", function () {
         guiaTab.classList.remove('active');
     });
 
-// Function to hide vista-participante
-function ocultarVistaParticipante() {
+    // Function to hide vista-participante
+    function ocultarVistaParticipante() {
     const vistaParticipanteElement = document.getElementById('vista-participante');
     if (vistaParticipanteElement) {
         vistaParticipanteElement.style.display = 'none';
     } else {
         console.error("No se encontró el elemento vista-participante");
     }
-}
+    }
 
-// Events to show lists
-btnInsignias.addEventListener('click', function () {
+    // Events to show lists
+    btnInsignias.addEventListener('click', function () {
     document.getElementById('cuadricula-insignias-container').style.display = 'block';
     document.getElementById('lista-participantes-container').style.display = 'none';
     document.getElementById('vista-participante').style.display = 'none'; // Asegúrate de ocultar vista-participante
-});
+    });
 
-btnParticipantes.addEventListener('click', function () {
+    btnParticipantes.addEventListener('click', function () {
     document.getElementById('lista-participantes-container').style.display = 'block';
     document.getElementById('cuadricula-insignias-container').style.display = 'none';
     document.getElementById('vista-participante').style.display = 'none'; // Asegúrate de ocultar vista-participante
-});
+    });
 
-function mostrarInsigniasDeParticipante(nombre) {
-    document.getElementById('vista-participante').style.display = 'block';
-    document.getElementById('lista-participantes-container').style.display = 'none';
-    document.getElementById('cuadricula-insignias-container').style.display = 'none';
-    document.getElementById("nombre-participante").textContent = nombre;
-}
     // Load participants in the modal select
     async function cargarParticipantesLogin() {
         const participantesCollection = collection(db, "Participantes");

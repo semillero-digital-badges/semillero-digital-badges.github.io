@@ -168,3 +168,35 @@ main {
     color: white;
     border: none;
 }
+
+/* En style.css (Ejemplo básico) */
+.insignia-detalle-item {
+    display: flex; /* Pone imagen y texto en línea */
+    align-items: center; /* Centra verticalmente */
+    margin-bottom: 15px; /* Espacio entre insignias */
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+  }
+  
+  .badge-image-detalle {
+    width: 60px; /* O el tamaño que prefieras */
+    height: 60px;
+    margin-right: 15px; /* Espacio entre imagen y texto */
+    object-fit: contain; /* Asegura que la imagen se vea bien */
+  }
+  
+  .insignia-detalle-item div {
+    flex-grow: 1; /* El texto ocupa el espacio restante */
+  }
+  
+  .insignia-detalle-item h5 {
+    margin: 0 0 5px 0; /* Ajusta márgenes del título */
+    font-size: 1.1em;
+  }
+  
+  .insignia-detalle-item p {
+    margin: 0; /* Ajusta márgenes del párrafo */
+    font-size: 0.9em;
+    color: #555;
+  }
