@@ -54,12 +54,10 @@
                     <div id="cuadricula-insignias" class="grid"></div>
                 </div>
                 <div id="lista-participantes-container" style="display:none;">
-                    <input type="text" id="search-participants" placeholder="Buscar participante..." />
                     <div id="participantes-grid">
                     </div>
                 </div>
                 <div id="vista-participante" style="display:none;">
-                    <input type="text" id="search-participants-vista" placeholder="Buscar participante..." />
                     <h3 id="nombre-participante"></h3>
                     <h4>Insignias obtenidas:</h4>
                     <div id="insignias-obtenidas"></div>
@@ -70,6 +68,13 @@
             </section>
         </main>
 
+        <div id="custom-alert-modal" class="custom-alert">
+            <div class="custom-alert-content">
+                <p id="custom-alert-message"></p>
+                <button id="custom-alert-close">Aceptar</button>
+            </div>
+        </div>
+    
         <script src="script.js" type="module"></script>
     </body>
     </html>

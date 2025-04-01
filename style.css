@@ -52,7 +52,7 @@ main {
 
 .badge-item {
     text-align: center;
-    cursor: pointer;
+    cursor: default;
 }
 
 .badge-image {
@@ -79,15 +79,17 @@ main {
     margin-top: 20px;
 }
 
-#participantes-grid div {
+#participantes-grid .participant-list-item {
     padding: 10px;
-    cursor: pointer;
-    text-align: center;
+    border-bottom: 1px solid #eee; /* Separador ligero */
+    transition: background-color 0.3s ease; /* Transición suave */
 }
 
-#participantes-grid div:hover {
-    background-color: #f1f1f1;
-}
+#participantes-grid .participant-list-item:hover {
+    background-color: #c8e6c9; /* Un verde claro agradable, puedes cambiar el código */
+    cursor: pointer; /* Indicar que es clickeable */
+    /* color: #1B5E20; */ /* Opcional: Cambiar color de texto a verde oscuro */
+  }
 
 #vista-participante {
     display: none;
@@ -150,23 +152,20 @@ main {
     background-color: #45a049;
 }
 
-.asignar-insignia,
-.reclamar-insignia {
-    padding: 5px 10px;
-    margin: 5px;
-    cursor: pointer;
+/* Botón "En progreso" - Azul */
+.progreso-insignia {
+    background-color: #007bff; /* Azul Bootstrap */
+}
+.progreso-insignia:hover {
+    background-color: #0056b3; /* Azul más oscuro al pasar el mouse */
 }
 
-.asignar-insignia {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-}
-
+/* Botón "Reclamar Insignia" - Verde */
 .reclamar-insignia {
-    background-color: #008CBA;
-    color: white;
-    border: none;
+    background-color: #28a745; /* Verde Bootstrap */
+}
+.reclamar-insignia:hover {
+    background-color: #1e7e34; /* Verde más oscuro al pasar el mouse */
 }
 
 /* En style.css (Ejemplo básico) */
@@ -200,3 +199,59 @@ main {
     font-size: 0.9em;
     color: #555;
   }
+
+  .badge-description {
+    font-size: 0.9em;
+    color: #555;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    min-height: 40px; /* Ajusta si quieres una altura mínima */
+}
+
+/* Custom Alert Modal Styles */
+.custom-alert {
+    display: none; /* Oculto por defecto */
+    position: fixed; /* Fijo en la pantalla */
+    z-index: 1000; /* Encima de otro contenido */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Scroll si el contenido es largo */
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+    /* Para centrar el contenido */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-alert-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 25px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px; /* Ancho máximo */
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+#custom-alert-message {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+#custom-alert-close {
+    background-color: #007bff; /* Azul o el color que prefieras */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+#custom-alert-close:hover {
+    background-color: #0056b3;
+}

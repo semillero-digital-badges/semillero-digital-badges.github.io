@@ -3,6 +3,28 @@ import { getFirestore, collection, getDocs, query, where, doc, updateDoc, arrayU
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Página cargada");
+    const customAlertModal = document.getElementById('custom-alert-modal');
+    const customAlertMessage = document.getElementById('custom-alert-message');
+    const customAlertClose = document.getElementById('custom-alert-close');
+
+    function showCustomAlert(message) {
+        if (customAlertMessage) customAlertMessage.textContent = message;
+        if (customAlertModal) customAlertModal.style.display = 'flex'; // 'flex' para que el centrado funcione
+    }
+
+    if (customAlertClose && customAlertModal) {
+        customAlertClose.addEventListener('click', () => {
+            customAlertModal.style.display = 'none';
+        });
+    }
+    // También cierra el modal si se hace clic fuera del contenido (opcional pero útil)
+     if (customAlertModal) {
+        customAlertModal.addEventListener('click', (event) => {
+             if (event.target === customAlertModal) { // Si el click fue en el fondo
+                 customAlertModal.style.display = 'none';
+             }
+         });
+     }
 
     // Firebase Config
     const firebaseConfig = {
@@ -29,29 +51,28 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnInsignias = document.getElementById('btn-insignias');
     const btnParticipantes = document.getElementById('btn-participantes');
     const cuadriculaInsignias = document.getElementById('cuadricula-insignias');
-    const listaParticipantes = document.getElementById('lista-participantes');
+    // const listaParticipantes = document.getElementById('lista-participantes'); // No parece usarse, se puede comentar/eliminar
     const vistaParticipante = document.getElementById('vista-participante');
-    const searchInput = document.getElementById("search-participants");
     const loginModal = document.getElementById('login-modal');
     const participantSelect = document.getElementById('participant-select');
     const securityQuestionInput = document.getElementById('security-question');
     const securityAnswerInput = document.getElementById('security-answer');
     const loginButton = document.getElementById('login-button');
-    
+
     // Functions to show and hide sections
     function showSection(section) {
         document.querySelectorAll('.tab-content').forEach(s => s.style.display = 'none');
         section.style.display = 'block';
     }
 
-    // Load badges
+    // Load badges - ¡ESTA ES LA VERSIÓN CORRECTA!
     async function cargarInsignias() {
         const insigniasCollection = collection(db, "Insignias");
         const gridContainer = document.getElementById("cuadricula-insignias");
 
         try {
             const snapshot = await getDocs(insigniasCollection);
-            gridContainer.innerHTML = "";
+            gridContainer.innerHTML = ""; // Limpia antes de añadir
             if (!snapshot.empty) {
                 snapshot.forEach(doc => {
                     const insignia = doc.data();
@@ -62,16 +83,19 @@ document.addEventListener("DOMContentLoaded", function () {
                         badgeItem.classList.add("badge-item");
 
                         const imageUrl = `https://semillero-digital-badges.github.io/assets/images/badges/${nombreArchivo}.png`;
+                        const descripcionInsignia = insignia.Descripción || ''; // Obtiene descripción
 
                         let participantsObtained = insignia.participantes_obtenida ? insignia.participantes_obtenida.join(', ') : 'Nadie';
                         let participantsInProgress = insignia.participantes_en_progreso ? insignia.participantes_en_progreso.join(', ') : 'Nadie';
 
+                        // Asegúrate que el botón tenga clase "progreso-insignia" y texto "En Progreso"
                         badgeItem.innerHTML = `
-                            <img src="${imageUrl}" alt="${insignia.Nombre || 'Insignia'}" class="badge-image" /> 
-                            <p>${insignia.Nombre || 'Nombre no disponible'}</p> 
-                            <p>Obtenida por: ${participantsObtained}</p>
-                            <p>En progreso: ${participantsInProgress}</p>
-                            <button class="asignar-insignia" data-insignia="${insignia.Nombre}">Asignar Insignia</button>
+                            <img src="${imageUrl}" alt="${insignia.Nombre || 'Insignia'}" class="badge-image" />
+                            <p><strong>${insignia.Nombre || 'Nombre no disponible'}</strong></p>
+                            <p class="badge-description">${descripcionInsignia}</p>
+                            <p><small>Obtenida por: ${participantsObtained}</small></p>
+                            <p><small>En progreso: ${participantsInProgress}</small></p>
+                            <button class="progreso-insignia" data-insignia="${insignia.Nombre}">En Progreso</button>
                             <button class="reclamar-insignia" data-insignia="${insignia.Nombre}">Reclamar Insignia</button>
                         `;
                         gridContainer.appendChild(badgeItem);
@@ -81,9 +105,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             } else {
                 console.log("❌ No hay insignias en la base de datos.");
+                gridContainer.innerHTML = "<p>No hay insignias para mostrar.</p>"; // Mensaje si está vacío
             }
         } catch (error) {
             console.error("❌ Error al cargar insignias:", error);
+            gridContainer.innerHTML = "<p>Error al cargar las insignias.</p>"; // Mensaje en caso de error
         }
     }
 
@@ -91,15 +117,16 @@ document.addEventListener("DOMContentLoaded", function () {
      async function cargarParticipantes() {
         const participantesCollection = collection(db, "Participantes");
         const gridContainer = document.getElementById("participantes-grid");
-    
+
         try {
             const snapshot = await getDocs(participantesCollection);
-            gridContainer.innerHTML = "";
+            gridContainer.innerHTML = ""; // Limpia antes de añadir
             if (!snapshot.empty) {
                 snapshot.forEach(doc => {
                     const participante = doc.data();
                     let participantDiv = document.createElement("div");
                     participantDiv.textContent = participante.Nombre;
+                    participantDiv.classList.add("participant-list-item"); // Asegura que la clase esté aquí
                     participantDiv.addEventListener("click", function () {
                         mostrarInsigniasDeParticipante(participante.Nombre);
                     });
@@ -107,307 +134,323 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             } else {
                 console.log("❌ No hay participantes en la base de datos.");
+                 gridContainer.innerHTML = "<p>No hay participantes para mostrar.</p>"; // Mensaje si está vacío
             }
         } catch (error) {
             console.error("❌ Error al cargar participantes:", error);
+            gridContainer.innerHTML = "<p>Error al cargar los participantes.</p>"; // Mensaje en caso de error
         }
     }
 
     // Functions that handle sidebar button clicks.
-    document.getElementById("btn-participantes").addEventListener("click", () => {
-        listaParticipantesContainer.style.display = "block";
-        cuadriculaInsigniasContainer.style.display = "none";
-        cargarParticipantes();
+    btnParticipantes.addEventListener("click", () => { // Usar directamente la variable
+        if (listaParticipantesContainer) listaParticipantesContainer.style.display = "block";
+        if (cuadriculaInsigniasContainer) cuadriculaInsigniasContainer.style.display = "none";
+        if (vistaParticipante) vistaParticipante.style.display = 'none'; // Ocultar vista detallada
+        cargarParticipantes(); // Cargar al mostrar
     });
-    
-    document.getElementById("btn-insignias").addEventListener("click", () => {
-        listaParticipantesContainer.style.display = "none";
-        cuadriculaInsigniasContainer.style.display = "block";
+
+    btnInsignias.addEventListener("click", () => { // Usar directamente la variable
+        if (listaParticipantesContainer) listaParticipantesContainer.style.display = "none";
+        if (cuadriculaInsigniasContainer) cuadriculaInsigniasContainer.style.display = "block";
+        if (vistaParticipante) vistaParticipante.style.display = 'none'; // Ocultar vista detallada
+        // No es necesario cargar insignias aquí si ya se cargaron al inicio,
+        // a menos que quieras recargar siempre. Si se cargan al inicio,
+        // la lista ya debería estar ahí.
+        // cargarInsignias();
     });
-    
-// Show participant badges (MODIFIED VERSION)
-async function mostrarInsigniasDeParticipante(nombre) {
-    console.log(`Mostrando insignias para: ${nombre}`); // Log para verificar nombre
-    const vistaParticipanteElement = document.getElementById('vista-participante');
-    const listaParticipantesContainerElement = document.getElementById('lista-participantes-container');
-    const cuadriculaInsigniasContainerElement = document.getElementById('cuadricula-insignias-container');
-    const nombreParticipanteElement = document.getElementById("nombre-participante");
-    const insigniasObtenidasDiv = document.getElementById("insignias-obtenidas");
-    const insigniasEnProgresoDiv = document.getElementById("insignias-en-progreso");
 
-    // Show the participant view and hide others
-    if (vistaParticipanteElement) vistaParticipanteElement.style.display = "block";
-    if (listaParticipantesContainerElement) listaParticipantesContainerElement.style.display = "none";
-    if (cuadriculaInsigniasContainerElement) cuadriculaInsigniasContainerElement.style.display = "none";
+    // Show participant badges (MODIFIED VERSION)
+    async function mostrarInsigniasDeParticipante(nombre) {
+        console.log(`Mostrando insignias para: ${nombre}`); // Log para verificar nombre
+        const vistaParticipanteElement = document.getElementById('vista-participante');
+        const listaParticipantesContainerElement = document.getElementById('lista-participantes-container');
+        const cuadriculaInsigniasContainerElement = document.getElementById('cuadricula-insignias-container');
+        const nombreParticipanteElement = document.getElementById("nombre-participante");
+        const insigniasObtenidasDiv = document.getElementById("insignias-obtenidas");
+        const insigniasEnProgresoDiv = document.getElementById("insignias-en-progreso");
 
-    // Set participant name
-    if (nombreParticipanteElement) nombreParticipanteElement.textContent = nombre;
+        // Show the participant view and hide others
+        if (vistaParticipanteElement) vistaParticipanteElement.style.display = "block";
+        if (listaParticipantesContainerElement) listaParticipantesContainerElement.style.display = "none";
+        if (cuadriculaInsigniasContainerElement) cuadriculaInsigniasContainerElement.style.display = "none";
 
-    // Clear previous badge displays
-    if (insigniasObtenidasDiv) insigniasObtenidasDiv.innerHTML = "";
-    if (insigniasEnProgresoDiv) insigniasEnProgresoDiv.innerHTML = "";
+        // Set participant name
+        if (nombreParticipanteElement) nombreParticipanteElement.textContent = nombre;
 
-    let obtenidasEncontradas = false;
-    let progresoEncontradas = false;
+        // Clear previous badge displays
+        if (insigniasObtenidasDiv) insigniasObtenidasDiv.innerHTML = "";
+        if (insigniasEnProgresoDiv) insigniasEnProgresoDiv.innerHTML = "";
 
-    // Query the ENTIRE "Insignias" collection
-    const insigniasCollection = collection(db, "Insignias");
-    try {
-        const snapshot = await getDocs(insigniasCollection);
-        console.log(`Se encontraron ${snapshot.docs.length} insignias en total.`); // Log para verificar fetch
+        let obtenidasEncontradas = false;
+        let progresoEncontradas = false;
 
-        if (!snapshot.empty) {
-            snapshot.forEach(docInsignia => {
-                const insignia = docInsignia.data();
-                const nombreInsignia = insignia.Nombre || 'Nombre no disponible';
-                const descripcionInsignia = insignia.Descripción || 'Descripción no disponible'; // Asumiendo que el campo se llama "Descripción"
-                const nombreArchivo = insignia.nombre_archivo;
+        // Query the ENTIRE "Insignias" collection
+        const insigniasCollection = collection(db, "Insignias");
+        try {
+            const snapshot = await getDocs(insigniasCollection);
+            console.log(`Se encontraron ${snapshot.docs.length} insignias en total.`); // Log para verificar fetch
 
-                // Check if the participant obtained this badge
-                const participantesObtenida = insignia.participantes_obtenida || [];
-                if (participantesObtenida.includes(nombre)) {
-                    obtenidasEncontradas = true;
-                    console.log(` -> ${nombre} OBTUVO: ${nombreInsignia}`); // Log detallado
+            if (!snapshot.empty) {
+                snapshot.forEach(docInsignia => {
+                    const insignia = docInsignia.data();
+                    const nombreInsignia = insignia.Nombre || 'Nombre no disponible';
+                    const descripcionInsignia = insignia.Descripción || 'Descripción no disponible';
+                    const nombreArchivo = insignia.nombre_archivo;
 
-                    if (nombreArchivo && insigniasObtenidasDiv) {
-                        const imageUrl = `https://semillero-digital-badges.github.io/assets/images/badges/${nombreArchivo}.png`;
-                        const badgeElement = document.createElement('div');
-                        badgeElement.classList.add('insignia-detalle-item'); // Clase para posible CSS
-                        badgeElement.innerHTML = `
-                            <img src="${imageUrl}" alt="${nombreInsignia}" class="badge-image-detalle" />
-                            <div>
-                                <h5>${nombreInsignia}</h5>
-                                <p>${descripcionInsignia}</p>
-                            </div>
-                        `;
-                        insigniasObtenidasDiv.appendChild(badgeElement);
-                    } else if (insigniasObtenidasDiv) {
-                         // Si no hay archivo, mostrar al menos el texto
-                        const badgeElement = document.createElement('div');
-                        badgeElement.classList.add('insignia-detalle-item');
-                        badgeElement.innerHTML = `
-                            <div>
-                                <h5>${nombreInsignia}</h5>
-                                <p>${descripcionInsignia}</p>
-                                <p><small>(Imagen no disponible)</small></p>
-                            </div>
-                        `;
-                        insigniasObtenidasDiv.appendChild(badgeElement);
-                        if (!nombreArchivo) console.warn(`Insignia obtenida "${nombreInsignia}" no tiene 'nombre_archivo'.`);
+                    // Check if the participant obtained this badge
+                    const participantesObtenida = insignia.participantes_obtenida || [];
+                    if (participantesObtenida.includes(nombre)) {
+                        obtenidasEncontradas = true;
+                        console.log(` -> ${nombre} OBTUVO: ${nombreInsignia}`);
+
+                        if (nombreArchivo && insigniasObtenidasDiv) {
+                            const imageUrl = `https://semillero-digital-badges.github.io/assets/images/badges/${nombreArchivo}.png`;
+                            const badgeElement = document.createElement('div');
+                            badgeElement.classList.add('insignia-detalle-item');
+                            badgeElement.innerHTML = `
+                                <img src="${imageUrl}" alt="${nombreInsignia}" class="badge-image-detalle" />
+                                <div>
+                                    <h5>${nombreInsignia}</h5>
+                                    <p>${descripcionInsignia}</p>
+                                </div>
+                            `;
+                            insigniasObtenidasDiv.appendChild(badgeElement);
+                        } else if (insigniasObtenidasDiv) {
+                           const badgeElement = document.createElement('div');
+                            badgeElement.classList.add('insignia-detalle-item');
+                            badgeElement.innerHTML = `
+                                <div>
+                                    <h5>${nombreInsignia}</h5>
+                                    <p>${descripcionInsignia}</p>
+                                    <p><small>(Imagen no disponible)</small></p>
+                                </div>
+                            `;
+                            insigniasObtenidasDiv.appendChild(badgeElement);
+                            if (!nombreArchivo) console.warn(`Insignia obtenida "${nombreInsignia}" no tiene 'nombre_archivo'.`);
+                        }
                     }
-                }
 
-                // Check if the participant has this badge in progress
-                const participantesEnProgreso = insignia.participantes_en_progreso || [];
-                if (participantesEnProgreso.includes(nombre)) {
-                    progresoEncontradas = true;
-                     console.log(` -> ${nombre} EN PROGRESO: ${nombreInsignia}`); // Log detallado
+                    // Check if the participant has this badge in progress
+                    const participantesEnProgreso = insignia.participantes_en_progreso || [];
+                    if (participantesEnProgreso.includes(nombre)) {
+                        progresoEncontradas = true;
+                         console.log(` -> ${nombre} EN PROGRESO: ${nombreInsignia}`);
 
-                    if (nombreArchivo && insigniasEnProgresoDiv) {
-                        const imageUrl = `https://semillero-digital-badges.github.io/assets/images/badges/${nombreArchivo}.png`;
-                        const badgeElement = document.createElement('div');
-                        badgeElement.classList.add('insignia-detalle-item'); // Clase para posible CSS
-                        badgeElement.innerHTML = `
-                            <img src="${imageUrl}" alt="${nombreInsignia}" class="badge-image-detalle" />
-                            <div>
-                                <h5>${nombreInsignia}</h5>
-                                <p>${descripcionInsignia}</p>
-                            </div>
-                        `;
-                        insigniasEnProgresoDiv.appendChild(badgeElement);
-                    } else if (insigniasEnProgresoDiv) {
-                         // Si no hay archivo, mostrar al menos el texto
-                        const badgeElement = document.createElement('div');
-                        badgeElement.classList.add('insignia-detalle-item');
-                        badgeElement.innerHTML = `
-                            <div>
-                                <h5>${nombreInsignia}</h5>
-                                <p>${descripcionInsignia}</p>
-                                <p><small>(Imagen no disponible)</small></p>
-                            </div>
-                        `;
-                        insigniasEnProgresoDiv.appendChild(badgeElement);
-                        if (!nombreArchivo) console.warn(`Insignia en progreso "${nombreInsignia}" no tiene 'nombre_archivo'.`);
+                        if (nombreArchivo && insigniasEnProgresoDiv) {
+                            const imageUrl = `https://semillero-digital-badges.github.io/assets/images/badges/${nombreArchivo}.png`;
+                            const badgeElement = document.createElement('div');
+                            badgeElement.classList.add('insignia-detalle-item');
+                            badgeElement.innerHTML = `
+                                <img src="${imageUrl}" alt="${nombreInsignia}" class="badge-image-detalle" />
+                                <div>
+                                    <h5>${nombreInsignia}</h5>
+                                    <p>${descripcionInsignia}</p>
+                                </div>
+                            `;
+                            insigniasEnProgresoDiv.appendChild(badgeElement);
+                        } else if (insigniasEnProgresoDiv) {
+                           const badgeElement = document.createElement('div');
+                            badgeElement.classList.add('insignia-detalle-item');
+                            badgeElement.innerHTML = `
+                                <div>
+                                    <h5>${nombreInsignia}</h5>
+                                    <p>${descripcionInsignia}</p>
+                                    <p><small>(Imagen no disponible)</small></p>
+                                </div>
+                            `;
+                            insigniasEnProgresoDiv.appendChild(badgeElement);
+                            if (!nombreArchivo) console.warn(`Insignia en progreso "${nombreInsignia}" no tiene 'nombre_archivo'.`);
+                        }
                     }
-                }
-            });
+                });
 
-        } else {
-            console.log("La colección de Insignias está vacía.");
-        }
+            } else {
+                console.log("La colección de Insignias está vacía.");
+            }
 
-        // Add messages if no badges were found for the categories
-        if (!obtenidasEncontradas && insigniasObtenidasDiv) {
-            insigniasObtenidasDiv.textContent = "No hay insignias obtenidas.";
-            console.log(`No se encontraron insignias OBTENIDAS para ${nombre}.`); // Log final
-        }
-        if (!progresoEncontradas && insigniasEnProgresoDiv) {
-            insigniasEnProgresoDiv.textContent = "No hay insignias en progreso.";
-             console.log(`No se encontraron insignias EN PROGRESO para ${nombre}.`); // Log final
-        }
+            // Add messages if no badges were found for the categories
+            if (!obtenidasEncontradas && insigniasObtenidasDiv) {
+                insigniasObtenidasDiv.textContent = "No hay insignias obtenidas.";
+                console.log(`No se encontraron insignias OBTENIDAS para ${nombre}.`);
+            }
+            if (!progresoEncontradas && insigniasEnProgresoDiv) {
+                insigniasEnProgresoDiv.textContent = "No hay insignias en progreso.";
+                 console.log(`No se encontraron insignias EN PROGRESO para ${nombre}.`);
+            }
 
-    } catch (error) {
-        console.error("Error al obtener insignias para el participante:", error);
-        if (insigniasObtenidasDiv) insigniasObtenidasDiv.textContent = "Error al cargar insignias.";
-        if (insigniasEnProgresoDiv) insigniasEnProgresoDiv.textContent = "Error al cargar insignias.";
+        } catch (error) {
+            console.error("Error al obtener insignias para el participante:", error);
+            if (insigniasObtenidasDiv) insigniasObtenidasDiv.textContent = "Error al cargar insignias.";
+            if (insigniasEnProgresoDiv) insigniasEnProgresoDiv.textContent = "Error al cargar insignias.";
+        }
     }
-}
 
     // Function for assigning badges
     async function asignarInsignia(nombreInsignia) {
         const nombreParticipante = participantSelect.value;
+        if (!nombreParticipante) {
+            showCustomAlert("Por favor, selecciona tu nombre en el menú desplegable primero.");
+            loginModal.style.display = 'flex';
+            return;
+        }
         const insigniasCollection = collection(db, "Insignias");
         const q = query(insigniasCollection, where("Nombre", "==", nombreInsignia));
         try {
             const snapshot = await getDocs(q);
             if (!snapshot.empty) {
-                snapshot.forEach(async docInsignia => {
-                    const insigniaRef = doc(db, "Insignias", docInsignia.id);
-                    await updateDoc(insigniaRef, {
-                        participantes_en_progreso: arrayUnion(nombreParticipante)
-                    });
-                    alert("Insignia asignada como objetivo.");
-                    actualizarListaParticipantes();
+                const docInsignia = snapshot.docs[0];
+                const insigniaRef = doc(db, "Insignias", docInsignia.id);
+                const insigniaData = docInsignia.data();
+    
+                const enProgresoPor = insigniaData.participantes_en_progreso || [];
+                const obtenidaPor = insigniaData.participantes_obtenida || [];
+    
+                // --- INICIO DE VERIFICACIONES ---
+                if (obtenidaPor.includes(nombreParticipante)) {
+                    showCustomAlert(`Skinner dice: ¡Ya has reclamado la insignia "${nombreInsignia}" previamente!`);
+                    return;
+                }
+                if (enProgresoPor.includes(nombreParticipante)) {
+                    showCustomAlert(`Skinner dice: Ya tienes la insignia "${nombreInsignia}" marcada En progreso.`);
+                    return;
+                }
+                // --- FIN DE VERIFICACIONES ---
+    
+                // Actualizar Firebase para añadir la insignia a "en progreso"
+                await updateDoc(insigniaRef, {
+                    participantes_en_progreso: arrayUnion(nombreParticipante)
                 });
+    
+                showCustomAlert(`Skinner dice: Insignia "${nombreInsignia}" marcada En progreso.`);
+                cargarInsignias(); // Actualizar la vista principal
+    
+                // Actualizar la vista de participante si está visible
+                if (vistaParticipante.style.display === 'block' && document.getElementById("nombre-participante").textContent === nombreParticipante) {
+                    mostrarInsigniasDeParticipante(nombreParticipante);
+                }
+    
             } else {
-                alert("Insignia no encontrada.");
+                showCustomAlert(`Skinner dice: No se encontró la insignia "${nombreInsignia}".`);
             }
         } catch (error) {
             console.error("Error al asignar insignia:", error);
-            alert("Error al asignar insignia.");
+            showCustomAlert("Skinner dice: Hubo un error al marcar la insignia En progreso.");
         }
     }
 
-    // Function for claiming badges
+    // Function for claiming badges (MODIFIED WITH CHECKS)
     async function reclamarInsignia(nombreInsignia) {
         const nombreParticipante = participantSelect.value;
+         if (!nombreParticipante) {
+             showCustomAlert("Por favor, selecciona tu nombre en el menú desplegable primero.");
+             loginModal.style.display = 'flex';
+             return;
+         }
         const insigniasCollection = collection(db, "Insignias");
         const q = query(insigniasCollection, where("Nombre", "==", nombreInsignia));
         try {
             const snapshot = await getDocs(q);
             if (!snapshot.empty) {
-                snapshot.forEach(async docInsignia => {
-                    const insigniaRef = doc(db, "Insignias", docInsignia.id);
-                    await updateDoc(insigniaRef, {
-                        participantes_en_progreso: arrayRemove(nombreParticipante),
-                        participantes_obtenida: arrayUnion(nombreParticipante)
-                    });
-                    alert("Insignia reclamada.");
-                    actualizarListaParticipantes();
+                 // Como el nombre de la insignia debe ser único, solo esperamos un documento.
+                const docInsignia = snapshot.docs[0];
+                const insigniaRef = doc(db, "Insignias", docInsignia.id);
+                const insigniaData = docInsignia.data(); // Obtenemos los datos actuales
+
+                // const enProgresoPor = insigniaData.participantes_en_progreso || []; // No es estrictamente necesario para la lógica actual, pero podría ser útil
+                const obtenidaPor = insigniaData.participantes_obtenida || [];
+
+                // --- INICIO DE VERIFICACIONES ---
+                 if (obtenidaPor.includes(nombreParticipante)) {
+                    showCustomAlert(`Skinner dice: ¡Ya has reclamado la insignia "${nombreInsignia}" previamente!`);
+                    return; // Detiene la ejecución si ya está obtenida
+                }
+                //     return;
+                // }
+                // --- FIN DE VERIFICACIONES ---
+
+                // Si pasa las verificaciones, procede a actualizar
+                await updateDoc(insigniaRef, {
+                    participantes_en_progreso: arrayRemove(nombreParticipante), // Quitar de progreso (importante)
+                    participantes_obtenida: arrayUnion(nombreParticipante)    // Añadir a obtenida
                 });
+                showCustomAlert(`Skinner dice: ¡Insignia "${nombreInsignia}" reclamada exitosamente!`);
+                cargarInsignias(); // Actualiza la vista principal
+                 // Si la vista de participante está visible, actualizarla también
+                 if (vistaParticipante.style.display === 'block' && document.getElementById("nombre-participante").textContent === nombreParticipante) {
+                     mostrarInsigniasDeParticipante(nombreParticipante);
+                 }
+
             } else {
-                alert("Insignia no encontrada.");
+                 showCustomAlert(`Skinner dice: No se encontró la insignia "${nombreInsignia}".`);
             }
         } catch (error) {
             console.error("Error al reclamar insignia:", error);
-            alert("Error al reclamar insignia.");
+            showCustomAlert("Skinner dice: Hubo un error al reclamar la insignia.");
         }
-    }
-    
-    // Update badges load function.
-    async function cargarInsignias() {
-      const insigniasCollection = collection(db, "Insignias");
-      const gridContainer = document.getElementById("cuadricula-insignias");
-    
-      try {
-        const snapshot = await getDocs(insigniasCollection);
-        gridContainer.innerHTML = "";
-        if (!snapshot.empty) {
-          snapshot.forEach(doc => {
-            const insignia = doc.data();
-            const nombreArchivo = insignia.nombre_archivo;
-    
-            if (nombreArchivo) {
-              let badgeItem = document.createElement("div");
-              badgeItem.classList.add("badge-item");
-    
-              const imageUrl = `https://semillero-digital-badges.github.io/assets/images/badges/${nombreArchivo}.png`;
-    
-              let participantsObtained = insignia.participantes_obtenida ? insignia.participantes_obtenida.join(', ') : 'Nadie';
-              let participantsInProgress = insignia.participantes_en_progreso ? insignia.participantes_en_progreso.join(', ') : 'Nadie';
-    
-              badgeItem.innerHTML = `
-                <img src="${imageUrl}" alt="${insignia.Nombre || 'Insignia'}" class="badge-image" /> 
-                <p>${insignia.Nombre || 'Nombre no disponible'}</p> 
-                <p>Obtenida por: ${participantsObtained}</p>
-                <p>En progreso: ${participantsInProgress}</p>
-                <button class="asignar-insignia" data-insignia="${insignia.Nombre}">Asignar Insignia</button>
-                <button class="reclamar-insignia" data-insignia="${insignia.Nombre}">Reclamar Insignia</button>
-              `;
-              gridContainer.appendChild(badgeItem);
-            } else {
-              console.warn(`La insignia ${insignia.Nombre || doc.id} no tiene un campo 'nombre_archivo'.`);
-            }
-          });
-        } else {
-          console.log("❌ No hay insignias en la base de datos.");
-        }
-      } catch (error) {
-        console.error("❌ Error al cargar insignias:", error);
-      }
     }
 
     // Navigation events
-    guiaTab.addEventListener('click', function () {
+    guiaTab.addEventListener('click', function (e) {
+        e.preventDefault(); // Prevenir comportamiento por defecto del enlace
         showSection(guiaSection);
         guiaTab.classList.add('active');
         dashboardTab.classList.remove('active');
     });
 
-    dashboardTab.addEventListener('click', function () {
+    dashboardTab.addEventListener('click', function (e) {
+         e.preventDefault(); // Prevenir comportamiento por defecto del enlace
         showSection(tableroSection);
         dashboardTab.classList.add('active');
         guiaTab.classList.remove('active');
+        // Cargar insignias si aún no se han cargado o si se quiere refrescar siempre
+        // Considera si es mejor cargarlas solo una vez al inicio
+        cargarInsignias();
     });
 
-    // Function to hide vista-participante
-    function ocultarVistaParticipante() {
-    const vistaParticipanteElement = document.getElementById('vista-participante');
-    if (vistaParticipanteElement) {
-        vistaParticipanteElement.style.display = 'none';
-    } else {
-        console.error("No se encontró el elemento vista-participante");
-    }
-    }
-
-    // Events to show lists
-    btnInsignias.addEventListener('click', function () {
-    document.getElementById('cuadricula-insignias-container').style.display = 'block';
-    document.getElementById('lista-participantes-container').style.display = 'none';
-    document.getElementById('vista-participante').style.display = 'none'; // Asegúrate de ocultar vista-participante
-    });
-
-    btnParticipantes.addEventListener('click', function () {
-    document.getElementById('lista-participantes-container').style.display = 'block';
-    document.getElementById('cuadricula-insignias-container').style.display = 'none';
-    document.getElementById('vista-participante').style.display = 'none'; // Asegúrate de ocultar vista-participante
-    });
+    // Function to hide vista-participante (No parece ser llamada directamente, pero la dejamos por si acaso)
+    // function ocultarVistaParticipante() {
+    // const vistaParticipanteElement = document.getElementById('vista-participante');
+    // if (vistaParticipanteElement) {
+    //     vistaParticipanteElement.style.display = 'none';
+    // } else {
+    //     console.error("No se encontró el elemento vista-participante");
+    // }
+    // }
 
     // Load participants in the modal select
     async function cargarParticipantesLogin() {
         const participantesCollection = collection(db, "Participantes");
         try {
             const snapshot = await getDocs(participantesCollection);
-            snapshot.forEach(doc => {
-                const participante = doc.data();
-                const option = document.createElement('option');
-                option.value = participante.Nombre;
-                option.textContent = participante.Nombre;
-                participantSelect.appendChild(option);
-            });
-            
-            // Trigger event change manually after loading participants
-            if (participantSelect.options.length > 0) {
-                participantSelect.dispatchEvent(new Event('change'));
-            }
+            // Limpiar opciones anteriores excepto la primera si es un placeholder
+             participantSelect.innerHTML = '<option value="">Selecciona tu nombre...</option>'; // Añadir un placeholder
+            if (!snapshot.empty) {
+                 snapshot.forEach(doc => {
+                     const participante = doc.data();
+                     const option = document.createElement('option');
+                     option.value = participante.Nombre;
+                     option.textContent = participante.Nombre;
+                     participantSelect.appendChild(option);
+                 });
+
+            } else {
+                 console.log("No se encontraron participantes para el login.");
+             }
         } catch (error) {
-            console.error("Error al cargar participantes:", error);
+            console.error("Error al cargar participantes para login:", error);
         }
     }
 
     // Show security question when selecting participant
     participantSelect.addEventListener('change', async function () {
         const selectedParticipant = this.value;
+        // Si el valor es vacío (el placeholder), limpiar pregunta y salir
+         if (!selectedParticipant) {
+             securityQuestionInput.value = "";
+             return;
+         }
+
         const participantesCollection = collection(db, "Participantes");
         const q = query(participantesCollection, where("Nombre", "==", selectedParticipant));
         try {
@@ -415,10 +458,10 @@ async function mostrarInsigniasDeParticipante(nombre) {
             if (!snapshot.empty) {
                 snapshot.forEach(doc => {
                     const participante = doc.data();
-                    securityQuestionInput.value = participante.pregunta_seguridad;
+                    securityQuestionInput.value = participante.pregunta_seguridad || "Pregunta no definida";
                 });
             } else {
-                console.log("Participante no encontrado.");
+                console.log("Participante no encontrado para pregunta.");
                 securityQuestionInput.value = "";
             }
         } catch (error) {
@@ -431,53 +474,96 @@ async function mostrarInsigniasDeParticipante(nombre) {
     loginButton.addEventListener('click', async function () {
         const selectedParticipant = participantSelect.value;
         const securityAnswer = securityAnswerInput.value;
+
+         // Validar que se seleccionó un nombre y se ingresó respuesta
+         if (!selectedParticipant) {
+             alert('Por favor, selecciona tu nombre.');
+             return;
+         }
+         if (!securityAnswer) {
+             alert('Por favor, ingresa la respuesta de seguridad.');
+             return;
+         }
+
         const participantesCollection = collection(db, "Participantes");
         const q = query(participantesCollection, where("Nombre", "==", selectedParticipant));
         try {
             const snapshot = await getDocs(q);
             if (!snapshot.empty) {
+                let correct = false;
                 snapshot.forEach(doc => {
                     const participante = doc.data();
-                    if (participante.respuesta_seguridad === securityAnswer) {
+                    // Comparación simple (considerar hacerla insensible a mayúsculas/minúsculas y espacios)
+                    if (participante.respuesta_seguridad && participante.respuesta_seguridad.trim().toLowerCase() === securityAnswer.trim().toLowerCase()) {
+                        correct = true;
                         loginModal.style.display = 'none';
-                    } else {
-                        alert('Respuesta incorrecta.');
+                         // Limpiar campos después de login exitoso
+                         securityAnswerInput.value = '';
+                         // participantSelect.value = ''; // Opcional: resetear selección
+                         // securityQuestionInput.value = ''; // Opcional: limpiar pregunta
                     }
                 });
+                 if (!correct) {
+                     alert('Respuesta incorrecta.');
+                 }
             } else {
-                console.log("Participante no encontrado.");
-                alert('Participante no encontrado');
+                console.log("Participante no encontrado durante login.");
+                alert('Participante no encontrado. Contacta al administrador.');
             }
         } catch (error) {
             console.error("Error al verificar respuesta de seguridad:", error);
-            alert("Error al verificar la respuesta");
+            alert("Error al verificar la respuesta. Intenta de nuevo.");
         }
     });
 
-    // Function for updating the list of participants
-    async function actualizarListaParticipantes() {
-        cargarParticipantes();
-    }
+    // Function for updating the list of participants (No parece usarse directamente)
+    // async function actualizarListaParticipantes() {
+    //     cargarParticipantes();
+    // }
 
-    // Click events for the buttons “Assign Badge” and “Claim Badge”.
+    // Click events for the buttons “In progress” and “Claim Badge”.
     document.addEventListener('click', function (event) {
-        if (event.target.classList.contains('asignar-insignia')) {
+        if (event.target.classList.contains('progreso-insignia')) {
             const nombreInsignia = event.target.dataset.insignia;
-            asignarInsignia(nombreInsignia);
+             // Verificar si hay un usuario logueado (seleccionado)
+             if (!participantSelect.value) {
+                 showCustomAlert("Debes iniciar sesión (seleccionando tu nombre) para marcar una insignia.");
+                 loginModal.style.display = 'flex';
+                 return;
+             }
+            if (confirm('¿Estás seguro que deseas marcar esta habilidad como tu objetivo de aprendizaje?')) {
+                asignarInsignia(nombreInsignia);
+            }
         } else if (event.target.classList.contains('reclamar-insignia')) {
             const nombreInsignia = event.target.dataset.insignia;
-            reclamarInsignia(nombreInsignia);
+             // Verificar si hay un usuario logueado (seleccionado)
+             if (!participantSelect.value) {
+                 showCustomAlert("Debes iniciar sesión (seleccionando tu nombre) para reclamar una insignia.");
+                 loginModal.style.display = 'flex';
+                 return;
+             }
+            if (confirm('¿Estás seguro de que deseas anunciar al grupo que ya has aprendido esta habilidad?')) {
+                reclamarInsignia(nombreInsignia);
+            }
         }
     });
 
     // Load initial data and display the “Quick Guide” section.
-    Promise.all([cargarInsignias(), cargarParticipantes(), cargarParticipantesLogin()])
+    Promise.all([
+        // cargarInsignias(), // No cargamos insignias aquí, se cargan al hacer clic en la pestaña "Tablero"
+        cargarParticipantesLogin(), // Cargar participantes para el login SIEMPRE
+        // cargarParticipantes() // No cargar participantes aquí, se cargan al hacer clic en el botón "Lista Participantes"
+        ])
         .then(() => {
-            loginModal.style.display = 'flex';
-            showSection(guiaSection);
-            guiaTab.classList.add('active');
+            loginModal.style.display = 'flex'; // Mostrar login al inicio
+            showSection(guiaSection);         // Mostrar guía al inicio
+            guiaTab.classList.add('active'); // Activar pestaña guía
+            dashboardTab.classList.remove('active'); // Desactivar otra pestaña
+            console.log("Datos iniciales (login) cargados.");
         })
         .catch(error => {
-            console.error("Error al cargar datos:", error);
+            console.error("Error al cargar datos iniciales:", error);
+             // Mostrar un error al usuario si falla la carga inicial crítica
+             // Podrías tener un div de error en el HTML
         });
 });
