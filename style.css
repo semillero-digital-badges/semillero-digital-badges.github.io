@@ -91,9 +91,20 @@ main {
 
 #vista-participante {
     display: none;
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
 }
 
-/* Estilos para el modal de inicio de sesión */
+#insignias-obtenidas,
+#insignias-en-progreso {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 10px;
+    text-align: left;
+}
+
+/* Styles for the login modal */
 .modal {
     display: flex;
     justify-content: center;
